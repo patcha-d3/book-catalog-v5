@@ -4,21 +4,21 @@ import "./App.css";
 import Modal from "./components/Modal.jsx";
 import AddBook from "./components/AddBook.jsx";
 import Book from "./book.jsx";
-import BookFilter from "./components/BookFilter.jsx";
+import BookFilter from "./components/BookFilter.jsx"; // ถ้ามี
 
 const LS_KEY = "books_v5";
 
 function App() {
   const [books, setBooks] = useState([]);
 
-  // Filter state (ตัวอย่าง: author)
+  // ----- Filter state (ตัวอย่าง: filter by author) -----
   const [filterCriteria, setFilterCriteria] = useState({ author: "" });
 
-  // Edit dialog state
+  // ----- Edit dialog state -----
   const editDialogRef = useRef(null);
   const [editingBook, setEditingBook] = useState(null);
 
-  // LocalStorage: load once
+  // ----- LocalStorage: load once -----
   useEffect(() => {
     try {
       const raw = localStorage.getItem(LS_KEY);
@@ -29,7 +29,7 @@ function App() {
     } catch {}
   }, []);
 
-  // LocalStorage: save on change
+  // ----- LocalStorage: save on change -----
   useEffect(() => {
     localStorage.setItem(LS_KEY, JSON.stringify(books));
   }, [books]);
@@ -65,7 +65,7 @@ function App() {
     setBooks((prev) => prev.filter((b) => b.isbn13 !== selectedBook.isbn13));
   };
 
-  // เปิดฟอร์มแก้ไข
+  // ----- เปิดฟอร์มแก้ไข -----
   const handleUpdateBook = () => {
     const selectedBook = books.find((b) => b.selected);
     if (!selectedBook) return alert("Please select a book to edit.");
@@ -73,7 +73,7 @@ function App() {
     editDialogRef.current?.showModal();
   };
 
-  // บันทึกผลการแก้ไข
+  // ----- บันทึกผลการแก้ไข -----
   const handleSubmitEdit = (patch) => {
     if (!editingBook) return;
     setBooks((prev) =>
@@ -90,7 +90,7 @@ function App() {
     setEditingBook(null);
   };
 
-  // Filter
+  // ----- Filter -----
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
     setFilterCriteria((p) => ({ ...p, [name]: value }));
@@ -109,45 +109,42 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Book Catalog 5</h1>
+        <h1>Book Catalog v4</h1>
       </header>
 
       <main className="content">
-        {/* 🔹 แถวบน: Filter กลางหน้า */}
-        <div className="filters-row">
+        <div className="content-add">
+          {/* ฟิลเตอร์ (ถ้าใช้งาน) */}
           <BookFilter
             filterCriteria={filterCriteria}
             onFilterChange={handleFilterChange}
             authors={uniqueAuthors}
           />
-        </div>
 
-        {/* 🔹 แถวล่าง: สองคอลัมน์ (ซ้ายปุ่ม/ขวาการ์ด) */}
-        <div className="content-body">
-          <div className="content-add">
-            <Modal btnLabel="Add" btnClassName="button-add">
-              <AddBook onAdd={handleAddBook} />
-            </Modal>
+          {/* ปุ่ม Add + modal */}
+          <Modal btnLabel="Add" btnClassName="button-add">
+            <AddBook onAdd={handleAddBook} />
+          </Modal>
 
-            <div className="action-buttons">
-              <button className="button-update" onClick={handleUpdateBook}>
-                Edit
-              </button>
-              <button className="button-delete" onClick={handleDeleteBook}>
-                Delete
-              </button>
-            </div>
+          {/* ปุ่ม Edit / Delete */}
+          <div className="action-buttons">
+            <button className="button-update" onClick={handleUpdateBook}>
+              Edit
+            </button>
+            <button className="button-delete" onClick={handleDeleteBook}>
+              Delete
+            </button>
           </div>
-
-          <BookTile books={filteredBooks} onSelect={toggleSelect} />
         </div>
+
+        <BookTile books={filteredBooks} onSelect={toggleSelect} />
       </main>
 
       <footer className="footer">
         <p>© Pat Sricome, 2025</p>
       </footer>
 
-      {/* Edit dialog */}
+      {/* ✅ Edit dialog แยกต่างหาก (ไม่มีปุ่ม x/cancel) */}
       <dialog ref={editDialogRef}>
         {editingBook && (
           <AddBook

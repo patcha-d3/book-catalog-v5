@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+// components/AddBook.jsx
+import { useState } from "react";
 
-function AddBook({ onAdd, initialData = null, submitLabel = "Save" }) {
+function AddBook({ onAdd }) {
   const [formData, setFormData] = useState({
     title: "",
     author: "",
@@ -11,34 +12,24 @@ function AddBook({ onAdd, initialData = null, submitLabel = "Save" }) {
     url: "",
   });
 
-  // ✅ เติมค่าเริ่มต้นตอนเปิดโหมดแก้ไข
-  useEffect(() => {
-    if (initialData) {
-      setFormData({
-        title: initialData.title || "",
-        author: initialData.author || "",
-        publisher: initialData.publisher || "",
-        year: initialData.year ?? "",
-        language: initialData.language || "",
-        pages: initialData.pages ?? "",
-        url: initialData.url || initialData.image || "",
-      });
-    }
-  }, [initialData]);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    // trim ข้อมูลหลัก ๆ กันช่องว่างล้วน
     const payload = {
       title: formData.title.trim(),
       author: formData.author.trim(),
       publisher: formData.publisher.trim(),
       language: formData.language.trim(),
+      // แปลงเป็นตัวเลขถ้ากรอก (ไม่งั้นปล่อยว่าง)
       year: formData.year ? Number(formData.year) : "",
       pages: formData.pages ? Number(formData.pages) : "",
       url: formData.url.trim(),
@@ -51,29 +42,30 @@ function AddBook({ onAdd, initialData = null, submitLabel = "Save" }) {
 
     onAdd(payload);
 
-    // reset เฉพาะตอน add (ไม่รีเซ็ตเวลา edit)
-    if (!initialData) {
-      setFormData({
-        title: "",
-        author: "",
-        publisher: "",
-        year: "",
-        language: "",
-        pages: "",
-        url: "",
-      });
-    }
+    // reset ฟอร์ม
+    setFormData({
+      title: "",
+      author: "",
+      publisher: "",
+      year: "",
+      language: "",
+      pages: "",
+      url: "",
+    });
 
-    // ปิด dialog ตัวที่ครอบอยู่
-    e.target.closest("dialog")?.close();
+    // ปิด dialog เฉพาะตัวที่ครอบฟอร์มนี้
+    const dialog = e.target.closest("dialog");
+    if (dialog) dialog.close();
   };
 
   return (
     <div className="form-container">
-      <h2>{initialData ? "Edit Book" : "Add New Book"}</h2>
+      <h2>Add New Book</h2>
       <form onSubmit={handleSubmit} className="modal-form" noValidate>
         <div className="form-row">
-          <label htmlFor="title">Title *</label>
+          <label htmlFor="title">
+            Title<span aria-hidden="true"> *</span>
+          </label>
           <input
             id="title"
             name="title"
@@ -81,10 +73,14 @@ function AddBook({ onAdd, initialData = null, submitLabel = "Save" }) {
             onChange={handleChange}
             placeholder="Book title"
             required
+            autoFocus
           />
         </div>
+
         <div className="form-row">
-          <label htmlFor="author">Author *</label>
+          <label htmlFor="author">
+            Author<span aria-hidden="true"> *</span>
+          </label>
           <input
             id="author"
             name="author"
@@ -94,6 +90,7 @@ function AddBook({ onAdd, initialData = null, submitLabel = "Save" }) {
             required
           />
         </div>
+
         <div className="form-row">
           <label htmlFor="publisher">Publisher</label>
           <input
@@ -104,6 +101,7 @@ function AddBook({ onAdd, initialData = null, submitLabel = "Save" }) {
             placeholder="Publisher"
           />
         </div>
+
         <div className="form-row">
           <label htmlFor="year">Publication Year</label>
           <input
@@ -111,11 +109,14 @@ function AddBook({ onAdd, initialData = null, submitLabel = "Save" }) {
             name="year"
             type="number"
             inputMode="numeric"
+            min="0"
+            max="9999"
             value={formData.year}
             onChange={handleChange}
             placeholder="e.g. 2024"
           />
         </div>
+
         <div className="form-row">
           <label htmlFor="language">Language</label>
           <input
@@ -126,6 +127,7 @@ function AddBook({ onAdd, initialData = null, submitLabel = "Save" }) {
             placeholder="Language"
           />
         </div>
+
         <div className="form-row">
           <label htmlFor="pages">Pages</label>
           <input
@@ -133,11 +135,13 @@ function AddBook({ onAdd, initialData = null, submitLabel = "Save" }) {
             name="pages"
             type="number"
             inputMode="numeric"
+            min="1"
             value={formData.pages}
             onChange={handleChange}
             placeholder="e.g. 320"
           />
         </div>
+
         <div className="form-row">
           <label htmlFor="url">Url Link (cover image)</label>
           <input
@@ -153,7 +157,7 @@ function AddBook({ onAdd, initialData = null, submitLabel = "Save" }) {
 
         <div className="modal-buttons">
           <button type="submit" className="btn primary">
-            {submitLabel}
+            Save
           </button>
         </div>
       </form>
