@@ -1,17 +1,12 @@
 import "./App.css";
 
-function Book({ title, author, image, loan, selected, onSelect }) {
-  const isLoaned = Boolean(loan);
-
+function Book({ title, author, image, selected, onSelect }) {
   return (
     <div
       className={`card-book ${selected ? "selected" : ""}`}
       onClick={onSelect}
     >
       <div className="card-book-image">
-        {/* แสดง badge มุมขวาบน */}
-        {isLoaned && <div className="book-loan-badge">On loan</div>}
-
         {image ? (
           <img src={image} alt={title} />
         ) : (
